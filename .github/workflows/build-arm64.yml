@@ -1,0 +1,79 @@
+name: Build Cursor ARM64
+
+on:
+  push:
+    branches: [custom]
+    tags: ['v*']
+  workflow_dispatch:
+    inputs:
+      publish:
+        description: Publish the tested package as a GitHub release
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+
+env:
+  VERSION: 0.6.1-libo.1
+
+jobs:
+  build:
+    runs-on: ubuntu-24.04-arm
+    container: golang:1.26-bookworm
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install packaging tools
+        run: apt-get update && apt-get install -y --no-install-recommends zip binutils
+      - name: Verify target and source version
+        run: |
+          test "$(go env GOARCH)" = arm64
+          grep -q '"Version": *"'"$VERSION"'"' internal/plugin/handler.go
+          if [ "$GITHUB_REF_TYPE" = tag ]; then test "$GITHUB_REF_NAME" = "v$VERSION"; fi
+      - name: Test and vet
+        run: |
+          test -z "$(gofmt -l .)"
+          go test ./...
+          go vet ./...
+      - name: Build Debian ARM64 native plugin
+        run: |
+          mkdir -p dist
+          CGO_ENABLED=1 go build -buildvcs=false -buildmode=c-shared -trimpath -ldflags='-s -w' -o dist/cursor.so .
+          readelf -h dist/cursor.so | grep AArch64
+          ldd dist/cursor.so
+          cp LICENSE THIRD_PARTY_NOTICES.md dist/
+          cd dist
+          zip "cursor_${VERSION}_linux_arm64.zip" cursor.so LICENSE THIRD_PARTY_NOTICES.md
+          sha256sum "cursor_${VERSION}_linux_arm64.zip" > checksums.txt
+      - uses: actions/upload-artifact@v4
+        with:
+          name: cursor-linux-arm64
+          path: |
+            dist/*.zip
+            dist/checksums.txt
+          if-no-files-found: error
+  publish:
+    needs: build
+    if: startsWith(github.ref, 'refs/tags/v') || (github.event_name == 'workflow_dispatch' && inputs.publish)
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: cursor-linux-arm64
+          path: dist
+      - name: Verify package checksums
+        working-directory: dist
+        run: sha256sum -c checksums.txt
+      - uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v${{ env.VERSION }}
+          target_commitish: ${{ github.sha }}
+          name: Cursor CPA ${{ env.VERSION }} (Linux ARM64)
+          make_latest: true
+          prerelease: false
+          generate_release_notes: true
+          files: |
+            dist/*.zip
+            dist/checksums.txt
