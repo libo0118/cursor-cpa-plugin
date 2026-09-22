@@ -1,0 +1,21 @@
+{
+  "schema_version": 1,
+  "plugins": [
+    {
+      "id": "cursor",
+      "name": "Cursor",
+      "description": "Cursor OAuth provider for CPA. Linux ARM64 build for Debian 12. Local token estimates are not an authoritative subscription balance.",
+      "author": "yobo, kilolonion; libo0118 compatibility fork",
+      "version": "0.6.1-libo.1",
+      "repository": "https://github.com/libo0118/cursor-cpa-plugin",
+      "homepage": "https://github.com/libo0118/cursor-cpa-plugin/tree/custom",
+      "license": "MIT",
+      "tags": [
+        "Provider",
+        "OAuth",
+        "Cursor",
+        "ARM64"
+      ]
+    }
+  ]
+}
