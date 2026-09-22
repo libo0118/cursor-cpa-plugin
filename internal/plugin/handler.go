@@ -83,8 +83,12 @@ func (handler *Handler) dispatch(ctx context.Context, method string, request []b
 		return handler.observeRequestAuth(request)
 	case "request.complete":
 		return handler.completeRequest(request)
-	case "auth.identifier", "executor.identifier":
+	case "auth.identifier", "executor.identifier", "quota.identifier":
 		return map[string]string{"identifier": "cursor"}, nil
+	case "quota.describe":
+		return map[string]any{"supported_providers": []string{"cursor"}, "display_name": "Cursor", "supports_reset": false}, nil
+	case "quota.fetch":
+		return handler.fetchQuota(ctx, request)
 	case "auth.parse":
 		return handler.parseAuth(request)
 	case "auth.login.start":
@@ -118,7 +122,7 @@ func registration() map[string]any {
 		"schema_version": 3,
 		"metadata": map[string]any{
 			"Name":             "cursor",
-			"Version":          "0.6.1-libo.1",
+			"Version":          "0.6.1-libo.2",
 			"Author":           "yobo",
 			"GitHubRepository": "https://github.com/libo0118/cursor-cpa-plugin",
 			"Logo":             pluginLogoURL,
@@ -131,6 +135,7 @@ func registration() map[string]any {
 			"request_interceptor":      true,
 			"request_lifecycle_plugin": true,
 			"usage_plugin":             false,
+			"quota_provider":           true,
 			"executor":                 true,
 			"executor_model_scope":     "oauth",
 			"executor_input_formats":   []string{"chat-completions"},
