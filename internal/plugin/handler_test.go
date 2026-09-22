@@ -29,9 +29,10 @@ func Test_Handler_Register_declares_cursor_auth_models_and_executor(t *testing.T
 	require.Contains(t, string(response.Result), `"executor":true`)
 	require.Contains(t, string(response.Result), `"management_api":true`)
 	require.Contains(t, string(response.Result), `"usage_plugin":false`)
+	require.Contains(t, string(response.Result), `"quota_provider":true`)
 	require.Contains(t, string(response.Result), `"request_interceptor":true`)
 	require.Contains(t, string(response.Result), `"request_lifecycle_plugin":true`)
-	require.Contains(t, string(response.Result), `"Version":"0.6.1-libo.1"`)
+	require.Contains(t, string(response.Result), `"Version":"0.6.1-libo.2"`)
 	require.Contains(t, string(response.Result), `"GitHubRepository":"https://github.com/libo0118/cursor-cpa-plugin"`)
 }
 
