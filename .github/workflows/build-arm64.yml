@@ -15,7 +15,7 @@ permissions:
   contents: read
 
 env:
-  VERSION: 0.6.1-libo.1
+  VERSION: 0.6.1-libo.2
 
 jobs:
   build:
@@ -32,6 +32,7 @@ jobs:
           if [ "$GITHUB_REF_TYPE" = tag ]; then test "$GITHUB_REF_NAME" = "v$VERSION"; fi
       - name: Test and vet
         run: |
+          gofmt -d .
           test -z "$(gofmt -l .)"
           go test ./...
           go vet ./...
