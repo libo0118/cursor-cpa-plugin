@@ -32,31 +32,31 @@ func (n *cursorQuotaNumber) UnmarshalJSON(raw []byte) error {
 
 type cursorPeriodQuota struct {
 	BillingCycleEnd *cursorQuotaNumber
-	PlanUsage *struct {
-		TotalSpend *cursorQuotaNumber
-		Limit *cursorQuotaNumber
-		Remaining *cursorQuotaNumber
+	PlanUsage       *struct {
+		TotalSpend       *cursorQuotaNumber
+		Limit            *cursorQuotaNumber
+		Remaining        *cursorQuotaNumber
 		TotalPercentUsed *cursorQuotaNumber
 	}
 	SpendLimitUsage *struct {
-		IndividualLimit *cursorQuotaNumber
+		IndividualLimit     *cursorQuotaNumber
 		IndividualRemaining *cursorQuotaNumber
-		PooledLimit *cursorQuotaNumber
-		PooledRemaining *cursorQuotaNumber
+		PooledLimit         *cursorQuotaNumber
+		PooledRemaining     *cursorQuotaNumber
 	}
 }
 
 type cursorGrantQuota struct {
 	HasCreditGrants bool
-	TotalCents *cursorQuotaNumber
-	UsedCents *cursorQuotaNumber
+	TotalCents      *cursorQuotaNumber
+	UsedCents       *cursorQuotaNumber
 }
 
 func (handler *Handler) fetchQuota(ctx context.Context, raw []byte) (any, error) {
 	var request struct {
-		StorageJSON []byte `json:"storage_json"`
+		StorageJSON    []byte `json:"storage_json"`
 		HostCallbackID string `json:"host_callback_id"`
-		Provider string `json:"provider"`
+		Provider       string `json:"provider"`
 	}
 	if err := json.Unmarshal(raw, &request); err != nil || (request.Provider != "" && request.Provider != "cursor") {
 		return nil, errors.New("invalid Cursor quota request")
@@ -75,7 +75,7 @@ func (handler *Handler) fetchQuota(ctx context.Context, raw []byte) (any, error)
 	}
 	plan := ""
 	if rawPlan, err := handler.quotaDashboard(ctx, request.HostCallbackID, credentials.AccessToken, "GetPlanInfo"); err == nil {
-		var info struct { PlanInfo struct { PlanName string } }
+		var info struct{ PlanInfo struct{ PlanName string } }
 		if json.Unmarshal(rawPlan, &info) == nil {
 			plan = info.PlanInfo.PlanName
 		}
@@ -96,11 +96,11 @@ func (handler *Handler) quotaDashboard(ctx context.Context, callbackID, token, m
 	}
 	response, err := handler.host.Call(ctx, "host.http.do", map[string]any{
 		"host_callback_id": callbackID,
-		"method": "POST",
-		"url": "https://api2.cursor.sh/aiserver.v1.DashboardService/" + method,
+		"method":           "POST",
+		"url":              "https://api2.cursor.sh/aiserver.v1.DashboardService/" + method,
 		"headers": map[string][]string{
-			"Authorization": {"Bearer " + token},
-			"Content-Type": {"application/json"},
+			"Authorization":            {"Bearer " + token},
+			"Content-Type":             {"application/json"},
 			"Connect-Protocol-Version": {"1"},
 		},
 		"body": []byte("{}"),
@@ -110,7 +110,7 @@ func (handler *Handler) quotaDashboard(ctx context.Context, callbackID, token, m
 	}
 	var result struct {
 		StatusCode int
-		Body []byte
+		Body       []byte
 	}
 	if err := json.Unmarshal(response, &result); err != nil {
 		return nil, errors.New("invalid Cursor quota transport response")
@@ -141,7 +141,10 @@ func normalizeCursorQuota(period cursorPeriodQuota, grants *cursorGrantQuota, pl
 			value := *limit - *remaining
 			used = &value
 		}
-		for _, metric := range []struct { suffix string; value *cursorQuotaNumber }{
+		for _, metric := range []struct {
+			suffix string
+			value  *cursorQuotaNumber
+		}{
 			{"used", used}, {"limit", limit}, {"remaining", remaining},
 		} {
 			if metric.value != nil {
@@ -163,7 +166,9 @@ func normalizeCursorQuota(period cursorPeriodQuota, grants *cursorGrantQuota, pl
 		if known {
 			fraction = math.Max(0, math.Min(1, fraction))
 			bucket := map[string]any{"window": key, "remainingFraction": fraction}
-			if resetTime != "" { bucket["resetTime"] = resetTime }
+			if resetTime != "" {
+				bucket["resetTime"] = resetTime
+			}
 			groups = append(groups, map[string]any{"displayName": label, "buckets": []map[string]any{bucket}})
 		}
 	}
@@ -185,6 +190,8 @@ func normalizeCursorQuota(period cursorPeriodQuota, grants *cursorGrantQuota, pl
 		return nil, errors.New("Cursor did not return usable quota data")
 	}
 	result := map[string]any{"groups": groups, "summary": summary}
-	if plan != "" { result["subscription"] = map[string]string{"plan": plan} }
+	if plan != "" {
+		result["subscription"] = map[string]string{"plan": plan}
+	}
 	return result, nil
 }
