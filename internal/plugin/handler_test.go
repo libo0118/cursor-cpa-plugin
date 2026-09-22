@@ -31,8 +31,8 @@ func Test_Handler_Register_declares_cursor_auth_models_and_executor(t *testing.T
 	require.Contains(t, string(response.Result), `"usage_plugin":false`)
 	require.Contains(t, string(response.Result), `"request_interceptor":true`)
 	require.Contains(t, string(response.Result), `"request_lifecycle_plugin":true`)
-	require.Contains(t, string(response.Result), `"Version":"0.6.1"`)
-	require.Contains(t, string(response.Result), `"GitHubRepository":"https://github.com/yobo2u/omsub"`)
+	require.Contains(t, string(response.Result), `"Version":"0.6.1-libo.1"`)
+	require.Contains(t, string(response.Result), `"GitHubRepository":"https://github.com/libo0118/cursor-cpa-plugin"`)
 }
 
 func Test_Handler_ManagementRegister_exposes_cursor_management_resource_and_authenticated_routes(t *testing.T) {
