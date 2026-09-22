@@ -4,9 +4,9 @@
     {
       "id": "cursor",
       "name": "Cursor",
-      "description": "Cursor OAuth provider for CPA. Linux ARM64 build for Debian 12. Local token estimates are not an authoritative subscription balance.",
+      "description": "Cursor OAuth provider for CPA with official account quota queries, plan and on-demand balances, and credit grants. Linux ARM64 build for Debian 12.",
       "author": "yobo, kilolonion; libo0118 compatibility fork",
-      "version": "0.6.1-libo.1",
+      "version": "0.6.1-libo.2",
       "repository": "https://github.com/libo0118/cursor-cpa-plugin",
       "homepage": "https://github.com/libo0118/cursor-cpa-plugin/tree/custom",
       "license": "MIT",
